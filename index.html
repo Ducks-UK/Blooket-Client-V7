@@ -1,6 +1,194 @@
-<iframe
-  src="https://www.blooket.com/"
-  width="100%"
-  height="700"
-  allow="fullscreen"
-></iframe>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blooket Live Inspector</title>
+<style>
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:#100d20;
+  color:#fff;
+  font-family:Arial,sans-serif;
+}
+header {
+  padding:22px;
+  background:#21183d;
+  border-bottom:1px solid #48366c;
+}
+h1 { margin:0; color:#b99aff; }
+.subtitle { color:#aaa0c5; margin-top:7px; }
+main {
+  max-width:1000px;
+  margin:25px auto;
+  padding:15px;
+}
+.panel {
+  background:#1e1931;
+  border:1px solid #40345c;
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:17px;
+}
+h2 { color:#c4a5ff; font-size:18px; }
+input {
+  width:100%;
+  padding:13px;
+  background:#100d20;
+  color:white;
+  border:1px solid #66518e;
+  border-radius:8px;
+  margin:8px 0;
+}
+button {
+  padding:12px 18px;
+  border:0;
+  border-radius:8px;
+  background:#9565ee;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+button:hover { background:#aa83ff; }
+.status { color:#ffc85a; }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+}
+pre {
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  color:#a9e8c4;
+  background:#100d20;
+  padding:12px;
+  border-radius:8px;
+  min-height:60px;
+}
+.event {
+  border-bottom:1px solid #40345c;
+  padding:9px 0;
+  color:#c8bddf;
+}
+.muted { color:#958ba9; font-size:13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔎 Blooket Live Inspector</h1>
+  <div class="subtitle">Educational Game Data Dashboard</div>
+</header>
+
+<main>
+
+<section class="panel">
+  <h2>🎮 Game Connection</h2>
+  <input id="gameId" placeholder="Enter game ID">
+  <button onclick="connect()">Connect</button>
+  <button onclick="disconnect()">Disconnect</button>
+  <p class="status" id="status">● Disconnected</p>
+  <p class="muted">Connects to the included local demonstration environment.</p>
+</section>
+
+<div class="grid">
+  <section class="panel">
+    <h2>🧠 Question Inspector</h2>
+    <div id="question">Waiting for game data...</div>
+    <div id="answer" class="muted"></div>
+  </section>
+
+  <section class="panel">
+    <h2>🎁 Chest Tracker</h2>
+    <div id="chests">No rewards received yet.</div>
+  </section>
+</div>
+
+<section class="panel">
+  <h2>📡 Live Event Monitor</h2>
+  <div id="events">No events yet.</div>
+</section>
+
+<section class="panel">
+  <h2>📦 JSON Data Inspector</h2>
+  <pre id="json">{}</pre>
+</section>
+
+</main>
+
+<script>
+let socket = null;
+
+function log(message) {
+  const events = document.getElementById("events");
+  const item = document.createElement("div");
+  item.className = "event";
+  item.textContent =
+    new Date().toLocaleTimeString() + " — " + message;
+  events.prepend(item);
+}
+
+function connect() {
+  const id = document.getElementById("gameId").value.trim();
+
+  if (!id) {
+    alert("Please enter a game ID.");
+    return;
+  }
+
+  disconnect();
+
+  document.getElementById("status").textContent =
+    "● Demo session connected";
+
+  log("Started local demonstration session: " + id);
+
+  const demoData = {
+    gameId: id,
+    mode: "Educational demo",
+    connected: true,
+    question: {
+      text: "What is 5 × 5?",
+      options: ["10", "20", "25", "30"],
+      correctAnswer: "25"
+    },
+    chests: [
+      { name: "Chest 1", reward: "50 coins", revealed: true },
+      { name: "Chest 2", reward: null, revealed: false }
+    ]
+  };
+
+  document.getElementById("question").textContent =
+    demoData.question.text;
+
+  document.getElementById("answer").textContent =
+    "Demo answer: " + demoData.question.correctAnswer;
+
+  document.getElementById("chests").textContent =
+    demoData.chests.map(chest =>
+      chest.name + ": " +
+      (chest.revealed ? chest.reward : "Not revealed")
+    ).join("\n");
+
+  document.getElementById("json").textContent =
+    JSON.stringify(demoData, null, 2);
+
+  log("Loaded demonstration question");
+  log("Loaded chest reward data");
+}
+
+function disconnect() {
+  if (socket) {
+    socket.close();
+    socket = null;
+  }
+
+  document.getElementById("status").textContent =
+    "● Disconnected";
+}
+
+</script>
+</body>
+</html>
