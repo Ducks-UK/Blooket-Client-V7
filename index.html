@@ -7,188 +7,335 @@
 <title>Blooket Live Inspector</title>
 <style>
 * { box-sizing:border-box; }
+
 body {
   margin:0;
-  background:#100d20;
+  background:#100c1d;
   color:#fff;
   font-family:Arial,sans-serif;
 }
+
 header {
   padding:22px;
-  background:#21183d;
-  border-bottom:1px solid #48366c;
+  background:#211638;
+  border-bottom:2px solid #8054bd;
 }
-h1 { margin:0; color:#b99aff; }
-.subtitle { color:#aaa0c5; margin-top:7px; }
-main {
-  max-width:1000px;
-  margin:25px auto;
-  padding:15px;
-}
+
+h1 { color:#c59cff; margin:0; }
+main { max-width:1050px; margin:auto; padding:20px; }
+
 .panel {
-  background:#1e1931;
-  border:1px solid #40345c;
-  border-radius:14px;
+  background:#201a30;
+  border:1px solid #49385f;
+  border-radius:15px;
   padding:18px;
-  margin-bottom:17px;
+  margin-bottom:18px;
 }
-h2 { color:#c4a5ff; font-size:18px; }
-input {
+
+h2 { color:#c49aff; font-size:19px; }
+
+input,textarea {
   width:100%;
-  padding:13px;
-  background:#100d20;
+  background:#110d20;
   color:white;
-  border:1px solid #66518e;
+  padding:12px;
+  border:1px solid #654c88;
   border-radius:8px;
-  margin:8px 0;
+  margin:7px 0;
 }
+
+textarea { min-height:140px; font-family:monospace; }
+
 button {
-  padding:12px 18px;
-  border:0;
-  border-radius:8px;
-  background:#9565ee;
+  background:#925ce4;
   color:white;
-  font-weight:bold;
+  border:0;
+  padding:12px 18px;
+  border-radius:8px;
   cursor:pointer;
+  font-weight:bold;
+  margin:4px 3px 4px 0;
 }
-button:hover { background:#aa83ff; }
-.status { color:#ffc85a; }
+
+button:hover { background:#ae80ff; }
+
 .grid {
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
 }
+
+.chest {
+  background:#302345;
+  padding:18px 8px;
+  border-radius:12px;
+  text-align:center;
+  border:1px solid #594274;
+}
+
+.chest .emoji { font-size:38px; }
+.chest h3 { color:#ffd16b; }
+
+.reward {
+  color:#a6efc0;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+
+.answer {
+  background:#174b38;
+  padding:16px;
+  border-radius:10px;
+  color:#a6f5c3;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+
+.muted { color:#a69bb8; font-size:13px; }
+
+.event {
+  padding:10px 0;
+  border-bottom:1px solid #49385f;
+  overflow-wrap:anywhere;
+}
+
 pre {
+  background:#110d20;
+  padding:14px;
+  border-radius:9px;
+  overflow:auto;
+  color:#a5e9bd;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
-  color:#a9e8c4;
-  background:#100d20;
-  padding:12px;
-  border-radius:8px;
-  min-height:60px;
 }
-.event {
-  border-bottom:1px solid #40345c;
-  padding:9px 0;
-  color:#c8bddf;
+
+@media(max-width:500px) {
+  .grid { grid-template-columns:1fr; }
 }
-.muted { color:#958ba9; font-size:13px; }
 </style>
 </head>
+
 <body>
 
 <header>
-  <h1>🔎 Blooket Live Inspector</h1>
-  <div class="subtitle">Educational Game Data Dashboard</div>
+  <h1>🎮 Blooket Live Inspector</h1>
+  <p class="muted">Gold Quest • Question Inspector • Chest Tracker</p>
 </header>
 
 <main>
 
 <section class="panel">
-  <h2>🎮 Game Connection</h2>
-  <input id="gameId" placeholder="Enter game ID">
-  <button onclick="connect()">Connect</button>
-  <button onclick="disconnect()">Disconnect</button>
-  <p class="status" id="status">● Disconnected</p>
-  <p class="muted">Connects to the included local demonstration environment.</p>
-</section>
-
-<div class="grid">
-  <section class="panel">
-    <h2>🧠 Question Inspector</h2>
-    <div id="question">Waiting for game data...</div>
-    <div id="answer" class="muted"></div>
-  </section>
-
-  <section class="panel">
-    <h2>🎁 Chest Tracker</h2>
-    <div id="chests">No rewards received yet.</div>
-  </section>
-</div>
-
-<section class="panel">
-  <h2>📡 Live Event Monitor</h2>
-  <div id="events">No events yet.</div>
+  <h2>🔌 Game Data</h2>
+  <input id="gameId" placeholder="Enter game ID (optional)">
+  <p class="muted">
+    Import JSON from an authorised game-data export.
+  </p>
+  <textarea id="dataInput"
+    placeholder='Paste game JSON here...'></textarea>
+  <button onclick="loadGame()">Load Game Data</button>
+  <button onclick="clearGame()">Clear</button>
+  <p id="status" class="muted">● Waiting for data</p>
 </section>
 
 <section class="panel">
-  <h2>📦 JSON Data Inspector</h2>
-  <pre id="json">{}</pre>
+  <h2>🎁 Gold Quest Chest Tracker</h2>
+  <div class="grid">
+    <div class="chest">
+      <div class="emoji">🧰</div>
+      <h3>CHEST 1</h3>
+      <div class="reward" id="chest1">Awaiting data</div>
+    </div>
+
+    <div class="chest">
+      <div class="emoji">🎁</div>
+      <h3>CHEST 2</h3>
+      <div class="reward" id="chest2">Awaiting data</div>
+    </div>
+
+    <div class="chest">
+      <div class="emoji">💎</div>
+      <h3>CHEST 3</h3>
+      <div class="reward" id="chest3">Awaiting data</div>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>🧠 Current Question</h2>
+  <p id="question">No question loaded.</p>
+  <p class="muted" id="timeLimit">Time limit: --</p>
+  <h3>Correct Answer</h3>
+  <div class="answer" id="correctAnswer">
+    Awaiting authorised answer data
+  </div>
+</section>
+
+<section class="panel">
+  <h2>📚 All Questions</h2>
+  <input id="search" placeholder="Search questions..."
+    oninput="renderQuestions()">
+  <div id="questions">No questions loaded.</div>
+</section>
+
+<section class="panel">
+  <h2>📡 Event Monitor</h2>
+  <div id="events">Waiting for events...</div>
+</section>
+
+<section class="panel">
+  <h2>📦 Raw Game Data</h2>
+  <pre id="raw">{}</pre>
 </section>
 
 </main>
 
 <script>
-let socket = null;
+let gameData = null;
 
 function log(message) {
-  const events = document.getElementById("events");
-  const item = document.createElement("div");
-  item.className = "event";
-  item.textContent =
+  const event = document.createElement("div");
+  event.className = "event";
+  event.textContent =
     new Date().toLocaleTimeString() + " — " + message;
-  events.prepend(item);
+
+  const events = document.getElementById("events");
+  if (events.textContent === "Waiting for events...") {
+    events.textContent = "";
+  }
+  events.prepend(event);
 }
 
-function connect() {
-  const id = document.getElementById("gameId").value.trim();
+function showChest(index, value) {
+  const element = document.getElementById("chest" + index);
+  element.textContent = value ?? "Not available";
+}
 
-  if (!id) {
-    alert("Please enter a game ID.");
+function loadGame() {
+  try {
+    const input = document.getElementById("dataInput").value;
+    const parsed = JSON.parse(input);
+
+    if (!parsed || typeof parsed !== "object" ||
+        Array.isArray(parsed)) {
+      throw new Error("Expected a JSON object");
+    }
+
+    gameData = parsed;
+
+    document.getElementById("status").textContent =
+      "● Data loaded successfully";
+
+    document.getElementById("raw").textContent =
+      JSON.stringify(gameData, null, 2);
+
+    const chests = Array.isArray(gameData.chests)
+      ? gameData.chests : [];
+
+    [1,2,3].forEach((number) => {
+      const chest = chests[number - 1];
+
+      showChest(
+        number,
+        chest?.revealed && chest.reward != null
+          ? chest.reward
+          : "Not available in imported data"
+      );
+    });
+
+    const questions = Array.isArray(gameData.questions)
+      ? gameData.questions : [];
+
+    const current = Number.isInteger(gameData.currentQuestion)
+      ? questions[gameData.currentQuestion] : questions[0];
+
+    if (current) {
+      document.getElementById("question").textContent =
+        current.question || "Unnamed question";
+
+      document.getElementById("timeLimit").textContent =
+        "Time limit: " + (current.timeLimit ?? "--") + " seconds";
+
+      document.getElementById("correctAnswer").textContent =
+        Array.isArray(current.correctAnswers)
+          ? current.correctAnswers.join(", ")
+          : "Answer not available";
+    } else {
+      document.getElementById("question").textContent =
+        "No question data available";
+
+      document.getElementById("correctAnswer").textContent =
+        "No answer data available";
+    }
+
+    renderQuestions();
+    log("Game data imported");
+    log(questions.length + " questions found");
+    log(chests.length + " chest records found");
+
+  } catch(error) {
+    document.getElementById("status").textContent =
+      "Error: " + error.message;
+    log("Import failed: " + error.message);
+  }
+}
+
+function renderQuestions() {
+  const container = document.getElementById("questions");
+  container.replaceChildren();
+
+  if (!gameData || !Array.isArray(gameData.questions)) {
+    container.textContent = "No questions loaded.";
     return;
   }
 
-  disconnect();
+  const search = document.getElementById("search")
+    .value.toLowerCase();
 
-  document.getElementById("status").textContent =
-    "● Demo session connected";
+  gameData.questions.forEach((q,index) => {
+    if (!(q.question || "").toLowerCase().includes(search)) {
+      return;
+    }
 
-  log("Started local demonstration session: " + id);
+    const div = document.createElement("div");
+    div.className = "event";
 
-  const demoData = {
-    gameId: id,
-    mode: "Educational demo",
-    connected: true,
-    question: {
-      text: "What is 5 × 5?",
-      options: ["10", "20", "25", "30"],
-      correctAnswer: "25"
-    },
-    chests: [
-      { name: "Chest 1", reward: "50 coins", revealed: true },
-      { name: "Chest 2", reward: null, revealed: false }
-    ]
-  };
+    const title = document.createElement("strong");
+    title.textContent = (index + 1) + ". " + q.question;
 
+    const answer = document.createElement("p");
+    answer.className = "reward";
+    answer.textContent = "Correct answer: " +
+      (Array.isArray(q.correctAnswers)
+        ? q.correctAnswers.join(", ")
+        : "Not available");
+
+    div.append(title,answer);
+    container.append(div);
+  });
+}
+
+function clearGame() {
+  gameData = null;
+  document.getElementById("dataInput").value = "";
+  document.getElementById("raw").textContent = "{}";
   document.getElementById("question").textContent =
-    demoData.question.text;
+    "No question loaded.";
+  document.getElementById("correctAnswer").textContent =
+    "Awaiting authorised answer data";
+  document.getElementById("timeLimit").textContent =
+    "Time limit: --";
 
-  document.getElementById("answer").textContent =
-    "Demo answer: " + demoData.question.correctAnswer;
+  [1,2,3].forEach(n => showChest(n,"Awaiting data"));
 
-  document.getElementById("chests").textContent =
-    demoData.chests.map(chest =>
-      chest.name + ": " +
-      (chest.revealed ? chest.reward : "Not revealed")
-    ).join("\n");
-
-  document.getElementById("json").textContent =
-    JSON.stringify(demoData, null, 2);
-
-  log("Loaded demonstration question");
-  log("Loaded chest reward data");
-}
-
-function disconnect() {
-  if (socket) {
-    socket.close();
-    socket = null;
-  }
+  document.getElementById("questions").textContent =
+    "No questions loaded.";
 
   document.getElementById("status").textContent =
-    "● Disconnected";
-}
+    "● Waiting for data";
 
+  log("Dashboard cleared");
+}
 </script>
+
 </body>
 </html>
